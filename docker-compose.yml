@@ -1,0 +1,50 @@
+services:
+  # Serviço do Banco de Dados MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db-container
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - minha-rede-app
+
+  # Serviço do Backend (Java/Spring Boot)
+  backend:
+    build:
+      context: ./backend # O Dockerfile está na pasta 'backend'
+    container_name: backend-container
+    restart: unless-stopped
+    depends_on:
+      - mysql-db # Garante que o banco de dados inicie antes do backend
+    environment:
+      - DB_URL=jdbc:mysql://mysql-db:3306/${DB_NAME} # Note o nome do serviço 'mysql-db'
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - minha-rede-app
+
+  # Serviço do Frontend (React/Nginx)
+  frontend:
+    build:
+      context: ./Aumigo-Front # O Dockerfile está na pasta 'frontend'
+    container_name: frontend-container
+    restart: unless-stopped
+    ports:
+      - "8080:80" # Mapeia a porta 80 do contêiner para a porta 8080 da sua máquina
+    depends_on:
+      - backend # Espera o backend estar pronto
+    networks:
+      - minha-rede-app
+
+volumes:
+  mysql-data:
+
+networks:
+  minha-rede-app:
+    driver: bridge
