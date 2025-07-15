@@ -17,7 +17,7 @@ services:
   # Serviço do Backend (Java/Spring Boot)
   backend:
     build:
-      context: ./backend # O Dockerfile está na pasta 'backend'
+      context: ./BackEnd # O Dockerfile está na pasta 'backend'
     container_name: backend-container
     restart: unless-stopped
     depends_on:
